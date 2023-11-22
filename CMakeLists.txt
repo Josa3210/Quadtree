@@ -9,4 +9,6 @@ add_library(QuadtreeLib STATIC
 
 add_executable(Quadtree src/main.cpp)
 
-target_include_directories(QuadtreeLib PRIVATE "includes/")
+target_include_directories(QuadtreeLib PRIVATE
+        "includes/QuadTree"
+        "includes/catch2")
