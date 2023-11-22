@@ -2,7 +2,7 @@
 // Created by Joeri on 11/22/2023.
 //
 
-#include "../includes/Point.h"
+#include "Point.h"
 
 Point::Point(double x, double y) : x(x), y(y) {}
 
