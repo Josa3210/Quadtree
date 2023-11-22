@@ -23,19 +23,15 @@ public:
 
     void setY(double y);
 
+    bool isHigher(const Point &point);
+
+    bool isLeft(const Point &point);
+
     friend std::ostream &operator<<(std::ostream &os, const Point &point);
 
     bool operator==(const Point &rhs) const;
 
     bool operator!=(const Point &rhs) const;
-
-    bool operator<(const Point &rhs) const;
-
-    bool operator>(const Point &rhs) const;
-
-    bool operator<=(const Point &rhs) const;
-
-    bool operator>=(const Point &rhs) const;
 
     Point operator+(const Point &rhs) const;
 };

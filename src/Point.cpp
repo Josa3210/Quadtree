@@ -36,24 +36,16 @@ std::ostream &operator<<(std::ostream &os, const Point &point) {
     return os;
 }
 
-bool Point::operator<(const Point &rhs) const {
-    return ((x < rhs.x) && (y < rhs.y));
-}
-
-bool Point::operator>(const Point &rhs) const {
-    return rhs < *this;
-}
-
-bool Point::operator<=(const Point &rhs) const {
-    return !(rhs < *this);
-}
-
-bool Point::operator>=(const Point &rhs) const {
-    return !(*this < rhs);
-}
-
 Point Point::operator+(const Point &rhs) const{
     double newX = this->x + rhs.x;
     double newY = this->y + rhs.y;
-    return Point(newX,newY);
+    return {newX,newY};
+}
+
+bool Point::isHigher(const Point &point) {
+    return (this->y > point.y);
+}
+
+bool Point::isLeft(const Point &point) {
+    return (this->x < point.x);
 }
