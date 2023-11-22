@@ -2,7 +2,7 @@
 // Created by Joeri on 11/22/2023.
 //
 
-#include "../includes/Point.h"
+#include "Point.h"
 
 Point::Point(double x, double y) : x(x), y(y) {}
 
@@ -42,7 +42,7 @@ Point Point::operator+(const Point &rhs) const{
     return {newX,newY};
 }
 
-bool Point::isHigher(const Point &point) {
+bool Point::isLower(const Point &point) {
     return (this->y > point.y);
 }
 

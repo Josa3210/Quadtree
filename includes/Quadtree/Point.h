@@ -23,7 +23,7 @@ public:
 
     void setY(double y);
 
-    bool isHigher(const Point &point);
+    bool isLower(const Point &point);
 
     bool isLeft(const Point &point);
 

@@ -8,7 +8,7 @@
 #include <tuple>
 #include <set>
 #include <ostream>
-#include <Point.h>
+#include "Point.h"
 
 // This class represents an axis-aligned bounding box
 // In a 2D problem, this is simply a rectangle whose sides are
@@ -36,6 +36,7 @@ public:
 
     void setHeight(double newHeight);
 
+    bool collides(const AxisAlignedBoundingBox &two);
 
     friend std::ostream &operator<<(std::ostream &os, const AxisAlignedBoundingBox &box);
 

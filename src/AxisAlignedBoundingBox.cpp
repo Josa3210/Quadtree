@@ -51,10 +51,28 @@ bool collides(const AxisAlignedBoundingBox &one, const AxisAlignedBoundingBox &t
     Point twoRD = two.getOrigin() + Point(two.length, two.height);  // The lower right point of the second rectangle
 
     if (oneRD.isLeft(twoLU) or twoRD.isLeft(oneLU)) {
-        return true;
+        return false;
     }
 
-    if (oneRD.isHigher(twoLU) or twoRD.isHigher(oneLU)) {
+    if (oneRD.isLower(twoLU) or twoRD.isLower(oneLU)) {
+        return false;
+    }
+
+    return true;
+}
+
+bool AxisAlignedBoundingBox::collides(const AxisAlignedBoundingBox &two) {
+    Point oneLU = this->getOrigin();  // The upper left point of the first rectangle
+    Point oneRD = this->getOrigin() + Point(this->getLength(), this->getHeight());  // The lower right point of the first rectangle
+
+    Point twoLU = two.getOrigin();  // The upper left point of the second rectangle
+    Point twoRD = two.getOrigin() + Point(two.getLength(), two.getHeight());  // The lower right point of the second rectangle
+
+    if (oneRD.isLeft(twoLU) or twoRD.isLeft(oneLU)) {
+        return false;
+    }
+
+    if (oneLU.isLower(twoRD) or twoLU.isLower(oneRD)) {
         return false;
     }
 
