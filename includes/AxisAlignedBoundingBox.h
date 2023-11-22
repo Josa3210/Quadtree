@@ -8,27 +8,25 @@
 #include <tuple>
 #include <set>
 #include <ostream>
-
-using point = std::tuple<double,double>;
-
+#include <Point.h>
 
 // This class represents an axis-aligned bounding box
 // In a 2D problem, this is simply a rectangle whose sides are
 // parallel to the X- and Y-axis
 class AxisAlignedBoundingBox {
 private:
-    point origin;                           // The upper-left corner of the rectangle
+    Point origin;                           // The upper-left corner of the rectangle
     double length;                          // The length of the rectangle (x-axis)
     double height;                          // The height of the rectangle (y-axis)
 
 public:
     // Constructor
-    AxisAlignedBoundingBox(point origin, double length, double height);
+    AxisAlignedBoundingBox(Point origin, double length, double height);
 
     // Getters and setters
-    const point &getOrigin() const;
+    const Point &getOrigin() const;
 
-    void setOrigin(const point &newOrigin);
+    void setOrigin(const Point &newOrigin);
 
     double getLength() const;
 

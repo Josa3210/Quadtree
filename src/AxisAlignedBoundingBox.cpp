@@ -3,18 +3,17 @@
 //
 
 #include "AxisAlignedBoundingBox.h"
-
 #include <utility>
 
 
-AxisAlignedBoundingBox::AxisAlignedBoundingBox(point origin, double length, double height)
-        : origin(std::move(origin)), length(length), height(height) {}
+AxisAlignedBoundingBox::AxisAlignedBoundingBox(Point origin, double length, double height)
+        : origin(origin), length(length), height(height) {}
 
-const point &AxisAlignedBoundingBox::getOrigin() const {
+const Point &AxisAlignedBoundingBox::getOrigin() const {
     return origin;
 }
 
-void AxisAlignedBoundingBox::setOrigin(const point &newOrigin) {
+void AxisAlignedBoundingBox::setOrigin(const Point &newOrigin) {
     AxisAlignedBoundingBox::origin = newOrigin;
 }
 
@@ -35,10 +34,29 @@ void AxisAlignedBoundingBox::setHeight(double newHeight) {
 }
 
 std::ostream &operator<<(std::ostream &os, const AxisAlignedBoundingBox &box) {
-    os << "origin: (" << get<0>(box.origin) << ", " << get<1>(box.origin) << "), length: " << box.length << ", height: " << box.height;
+    os << "origin: " << box.origin << ", length: " << box.length << ", height: " << box.height;
     return os;
 }
 
+// Check if two rectangles collide by looking if:
+// - The right side of one rectangle is left of the left side of the other one
+// - The lower side of one rectangle is above the upper side of the other one
+//
+// Based on: https://www.geeksforgeeks.org/find-two-rectangles-overlap/
 bool collides(const AxisAlignedBoundingBox &one, const AxisAlignedBoundingBox &two) {
-    return false;
+    Point oneLU = one.getOrigin();  // The upper left point of the first rectangle
+    Point oneRD = one.getOrigin() + Point(one.length, one.height);  // The lower right point of the first rectangle
+
+    Point twoLU = two.getOrigin();  // The upper left point of the second rectangle
+    Point twoRD = two.getOrigin() + Point(two.length, two.height);  // The lower right point of the second rectangle
+
+    if (oneRD.isLeft(twoLU) or twoRD.isLeft(oneLU)) {
+        return true;
+    }
+
+    if (oneRD.isHigher(twoLU) or twoRD.isHigher(oneLU)) {
+        return false;
+    }
+
+    return true;
 }
