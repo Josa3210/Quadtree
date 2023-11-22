@@ -42,7 +42,7 @@ Point Point::operator+(const Point &rhs) const{
     return {newX,newY};
 }
 
-bool Point::isHigher(const Point &point) {
+bool Point::isLower(const Point &point) {
     return (this->y > point.y);
 }
 

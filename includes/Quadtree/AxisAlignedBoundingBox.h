@@ -36,6 +36,7 @@ public:
 
     void setHeight(double newHeight);
 
+    bool collides(const AxisAlignedBoundingBox &two);
 
     friend std::ostream &operator<<(std::ostream &os, const AxisAlignedBoundingBox &box);
 
