@@ -51,3 +51,9 @@ bool Point::operator<=(const Point &rhs) const {
 bool Point::operator>=(const Point &rhs) const {
     return !(*this < rhs);
 }
+
+Point Point::operator+(const Point &rhs) const{
+    double newX = this->x + rhs.x;
+    double newY = this->y + rhs.y;
+    return Point(newX,newY);
+}
