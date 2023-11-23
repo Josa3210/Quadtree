@@ -6,6 +6,7 @@
 #define QUADTREE_QUADTREE_H
 
 
+#include <vector>
 #include "AxisAlignedBoundingBox.h"
 
 // This class is our actual quadtree
@@ -16,6 +17,10 @@ class Quadtree {
 private:
     AxisAlignedBoundingBox bounds;
     unsigned int capacity;
+
+    std::vector<std::tuple<AxisAlignedBoundingBox,MetadataType>> objects;
+
+    bool subdivided = false;
 
     Quadtree<MetadataType> *northEast = nullptr;
     Quadtree<MetadataType> *southEast = nullptr;
@@ -52,6 +57,10 @@ public:
 // There is no requirement with regards to
 // the order that you visit these elements in.
     auto end();
+
+    void divide();
+
+    void redivide();
 };
 
 
