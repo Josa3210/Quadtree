@@ -15,9 +15,9 @@
 // parallel to the X- and Y-axis
 class AxisAlignedBoundingBox {
 private:
-    Point origin;                           // The upper-left corner of the rectangle
-    double length;                          // The length of the rectangle (x-axis)
-    double height;                          // The height of the rectangle (y-axis)
+    Point origin;                           // The center of the rectangle
+    double length;                          // The half length of the rectangle (x-axis)
+    double height;                          // The half height of the rectangle (y-axis)
 
 public:
     // Constructor
