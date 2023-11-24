@@ -50,31 +50,31 @@ bool collides(const AxisAlignedBoundingBox &one, const AxisAlignedBoundingBox &t
     Point twoLU = two.getOrigin() + Point(-two.length, -two.height);// The upper left point of the second rectangle
     Point twoRD = two.getOrigin() + Point(two.length, two.height);  // The lower right point of the second rectangle
 
-    if (oneRD.isLeft(twoLU) or twoRD.isLeft(oneLU)) {
-        return false;
-    }
-
-    if (oneRD.isLower(twoLU) or twoRD.isLower(oneLU)) {
-        return false;
-    }
-
-    return true;
+    return !(oneRD.isLeft(twoLU) or twoRD.isLeft(oneLU) or oneRD.isLower(twoLU) or twoRD.isLower(oneLU));
 }
 
 bool AxisAlignedBoundingBox::collides(const AxisAlignedBoundingBox &two) {
-    Point oneLU = this->getOrigin() + Point(-this->length, -this->height);  // The upper left point of the first rectangle
-    Point oneRD = this->getOrigin() + Point(this->length, this->height);  // The lower right point of the first rectangle
+    Point oneLU = this->getOrigin() + Point(-length, -height);  // The upper left point of the first rectangle
+    Point oneRD = this->getOrigin() + Point(length, height);  // The lower right point of the first rectangle
 
     Point twoLU = two.getOrigin() + Point(-two.length, -two.height);// The upper left point of the second rectangle
     Point twoRD = two.getOrigin() + Point(two.length, two.height);  // The lower right point of the second rectangle
 
-    if (oneRD.isLeft(twoLU) or twoRD.isLeft(oneLU)) {
-        return false;
-    }
+    return !(oneRD.isLeft(twoLU) or twoRD.isLeft(oneLU) or oneLU.isLower(twoRD) or twoLU.isLower(oneRD));
+}
 
-    if (oneLU.isLower(twoRD) or twoLU.isLower(oneRD)) {
-        return false;
-    }
+bool AxisAlignedBoundingBox::contains(const AxisAlignedBoundingBox &box) {
+    Point boxOrigin = box.getOrigin();
 
-    return true;
+    return (
+            this->contains(boxOrigin + Point(box.length, box.height)) and
+            this->contains(boxOrigin + Point(-box.length, -box.height))
+    );
+}
+
+bool AxisAlignedBoundingBox::contains(const Point &point) {
+    return (
+            (point.getX() < origin.getX() + length) and (point.getX() > origin.getX() - length) and
+            (point.getY() < origin.getY() + height) and (point.getY() > origin.getY() - height)
+    );
 }

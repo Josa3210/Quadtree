@@ -39,6 +39,9 @@ public:
 
     bool collides(const AxisAlignedBoundingBox &two);
 
+    bool contains(const AxisAlignedBoundingBox &box);
+    bool contains(const Point &point);
+
     friend std::ostream &operator<<(std::ostream &os, const AxisAlignedBoundingBox &box);
 
     // This friend function (A free function that can access private fields) should check if two AABBs overlap

@@ -8,7 +8,7 @@ add_library(QuadtreeLib STATIC
         "src/Point.cpp" src/QuadTree.cpp includes/Quadtree/QuadTree.h)
 
 add_executable(TestSuite
-        "test/main.cpp" test/AxisAlignedBoundingBoxTest.cpp test/QuadTree.cpp)
+        "test/main.cpp" test/AxisAlignedBoundingBoxTest.cpp test/QuadTreeTest.cpp)
 
 target_include_directories(QuadtreeLib PRIVATE
         "includes/Quadtree")
