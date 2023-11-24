@@ -137,6 +137,28 @@ public:
         return northWest;
     }
 
+    void show(std::string str){
+        str += "  ";
+        std::cout<<str<<"Quadtree:" << std::endl;
+        std::cout<<str<<"Bounds( Origin: (" << this->bounds.getOrigin().getX() << ", " << this->bounds.getOrigin().getY()<< "), Length: " << this->bounds.getLength() << ", Height: " << this->bounds.getHeight() << std::endl;
+        std::cout<<str<<"Objects: ";
+        auto it = this->objects.begin();
+        while(it != objects.end()){
+            std::cout<<"("<< std::get<0>(*it)<<", " << std::get<1>(*it) <<"), ";
+            it++;
+        }
+        std::cout << std::endl;
+        if (this->isSubdivided()) {
+            std::cout<<str<<"Is divided: "<<std::endl;
+            this->getNorthEast()->show(str);
+            this->getSouthEast()->show(str);
+            this->getSouthWest()->show(str);
+            this->getNorthWest()->show(str);
+        } else {
+            std::cout<<str<<"Is not divided" << std::endl;
+        }
+    }
+
     friend std::ostream &operator<<(std::ostream &os, const Quadtree &quadtree) {
         os << "bounds: " << quadtree.bounds << ", region_capacity: " << quadtree.region_capacity << ", subdivided: " << quadtree.subdivided << ", northEast: " << quadtree.northEast << ", southEast: "
            << quadtree.southEast << ", southWest: " << quadtree.southWest << ", northWest: " << quadtree.northWest;

@@ -85,5 +85,5 @@ TEST_CASE("Division of QuadTree when capacity is full"){
 
     REQUIRE(std::get<0>(quadtree.getObjects().at(0)) == testBox4);
 
-    std::cout << quadtree << std::endl;
+    quadtree.show("");
 }
