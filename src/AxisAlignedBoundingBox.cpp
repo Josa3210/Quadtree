@@ -6,8 +6,9 @@
 #include <utility>
 
 
-AxisAlignedBoundingBox::AxisAlignedBoundingBox(Point origin, double length, double height)
-        : origin(origin), length(length), height(height) {}
+AxisAlignedBoundingBox::AxisAlignedBoundingBox(Point origin, double length, double height) : origin(origin), length(length), height(height) {}
+
+AxisAlignedBoundingBox::AxisAlignedBoundingBox() : origin(Point(0, 0)), length(0), height(0) {};
 
 const Point &AxisAlignedBoundingBox::getOrigin() const {
     return origin;
@@ -34,7 +35,7 @@ void AxisAlignedBoundingBox::setHeight(double newHeight) {
 }
 
 std::ostream &operator<<(std::ostream &os, const AxisAlignedBoundingBox &box) {
-    os << "origin: " << box.origin << ", length: " << box.length << ", height: " << box.height;
+    os << "AABB(origin: " << box.origin << ", length: " << box.length << ", height: " << box.height << ")";
     return os;
 }
 
@@ -66,15 +67,18 @@ bool AxisAlignedBoundingBox::collides(const AxisAlignedBoundingBox &two) {
 bool AxisAlignedBoundingBox::contains(const AxisAlignedBoundingBox &box) {
     Point boxOrigin = box.getOrigin();
 
-    return (
-            this->contains(boxOrigin + Point(box.length, box.height)) and
-            this->contains(boxOrigin + Point(-box.length, -box.height))
-    );
+    return (this->contains(boxOrigin + Point(box.length, box.height)) and (this->contains(boxOrigin + Point(-box.length, -box.height))));
 }
 
 bool AxisAlignedBoundingBox::contains(const Point &point) {
-    return (
-            (point.getX() < origin.getX() + length) and (point.getX() > origin.getX() - length) and
-            (point.getY() < origin.getY() + height) and (point.getY() > origin.getY() - height)
-    );
+    return ((point.getX() < origin.getX() + length) and (point.getX() > origin.getX() - length) and (point.getY() < origin.getY() + height) and (point.getY() > origin.getY() - height));
 }
+
+bool AxisAlignedBoundingBox::operator==(const AxisAlignedBoundingBox &rhs) const {
+    return origin == rhs.origin && length == rhs.length && height == rhs.height;
+}
+
+bool AxisAlignedBoundingBox::operator!=(const AxisAlignedBoundingBox &rhs) const {
+    return !(rhs == *this);
+}
+

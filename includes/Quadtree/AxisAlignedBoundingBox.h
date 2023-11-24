@@ -23,6 +23,7 @@ private:
 public:
     // Constructor
     AxisAlignedBoundingBox(Point origin, double length, double height);
+    AxisAlignedBoundingBox();
 
     // Getters and setters
     const Point &getOrigin() const;
@@ -48,7 +49,12 @@ public:
     // It returns true if there is overlap, false if there isn’t
     friend bool collides(
             const AxisAlignedBoundingBox &one,
-            const AxisAlignedBoundingBox &two);
+            const AxisAlignedBoundingBox &two
+    );
+
+    bool operator==(const AxisAlignedBoundingBox &rhs) const;
+
+    bool operator!=(const AxisAlignedBoundingBox &rhs) const;
 };
 
 
