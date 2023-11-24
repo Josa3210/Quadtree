@@ -14,6 +14,7 @@
 // In a 2D problem, this is simply a rectangle whose sides are
 // parallel to the X- and Y-axis
 class AxisAlignedBoundingBox {
+    friend class QuadTree;
 private:
     Point origin;                           // The center of the rectangle
     double length;                          // The half length of the rectangle (x-axis)
