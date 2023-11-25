@@ -3264,8 +3264,8 @@ namespace Matchers {
         };
 
 #if defined(__OBJC__)
-        // Hack to fix Catch GH issue #1661. Could use id for generic Object support.
-        // use of const for Object pointers is very uncommon and under ARC it causes some kind of signature mismatch that breaks compilation
+        // Hack to fix Catch GH issue #1661. Could use id for generic object support.
+        // use of const for object pointers is very uncommon and under ARC it causes some kind of signature mismatch that breaks compilation
         template<>
         struct MatcherMethod<NSString*> {
             virtual bool match( NSString* arg ) const = 0;

@@ -11,12 +11,9 @@
 #include <utility>
 #include <unordered_set>
 #include <list>
-#include "AxisAlignedBoundingBox.h"
+#include "axisAlignedBoundingBox.h"
 #include "unordered_set_extension.h"
-
-template<typename MetadataType> using Object = std::tuple<AxisAlignedBoundingBox, MetadataType>;
-
-template<typename MetadataType> using ObjectSet = std::unordered_set<MetadataType>;
+#include "object.h"
 
 // This class is our actual quadtree
 // It stores AABB’s together with some metadata
@@ -24,10 +21,10 @@ template<typename MetadataType> using ObjectSet = std::unordered_set<MetadataTyp
 template<typename MetadataType>
 class Quadtree {
 private:
-    AxisAlignedBoundingBox bounds;
+    axisAlignedBoundingBox bounds;
     unsigned int region_capacity;
 
-    std::vector<Object<MetadataType>> objects;
+    std::vector<object<MetadataType>> objects;
 
     bool divided = false;
 
@@ -37,17 +34,17 @@ private:
     Quadtree<MetadataType> *northWest = nullptr;
 
     void divide() {
-        Point origin = bounds.getOrigin();
+        point origin = bounds.getOrigin();
         double length = bounds.getLength();
         double height = bounds.getHeight();
 
-        AxisAlignedBoundingBox ne = AxisAlignedBoundingBox(origin + Point(length / 2, -height / 2), length / 2, height / 2);
+        axisAlignedBoundingBox ne = axisAlignedBoundingBox(origin + point(length / 2, -height / 2), length / 2, height / 2);
         this->northEast = new Quadtree<MetadataType>(ne, this->region_capacity);
-        AxisAlignedBoundingBox se = AxisAlignedBoundingBox(origin + Point(length / 2, height / 2), length / 2, height / 2);
+        axisAlignedBoundingBox se = axisAlignedBoundingBox(origin + point(length / 2, height / 2), length / 2, height / 2);
         this->southEast = new Quadtree<MetadataType>(se, this->region_capacity);
-        AxisAlignedBoundingBox sw = AxisAlignedBoundingBox(origin + Point(-length / 2, height / 2), length / 2, height / 2);
+        axisAlignedBoundingBox sw = axisAlignedBoundingBox(origin + point(-length / 2, height / 2), length / 2, height / 2);
         this->southWest = new Quadtree<MetadataType>(sw, this->region_capacity);
-        AxisAlignedBoundingBox nw = AxisAlignedBoundingBox(origin + Point(-length / 2, -height / 2), length / 2, height / 2);
+        axisAlignedBoundingBox nw = axisAlignedBoundingBox(origin + point(-length / 2, -height / 2), length / 2, height / 2);
         this->northWest = new Quadtree<MetadataType>(nw, this->region_capacity);
 
         this->divided = true;
@@ -56,19 +53,19 @@ private:
     void redivide() {
         auto it = objects.begin();
         while (it != objects.end()) {
-            std::tuple<AxisAlignedBoundingBox, MetadataType> object = *it;
-            AxisAlignedBoundingBox aabb = std::get<0>(object);
+            std::tuple<axisAlignedBoundingBox, MetadataType> object = *it;
+            axisAlignedBoundingBox aabb = object.box;
             if (this->northEast->bounds.contains(aabb)) {
-                northEast->insert(aabb, std::get<1>(object));
+                northEast->insert(aabb, object.value);
                 it = objects.erase(it);
             } else if (this->southEast->bounds.contains(aabb)) {
-                southEast->insert(aabb, std::get<1>(object));
+                southEast->insert(aabb, object.value);
                 it = objects.erase(it);
             } else if (this->southWest->bounds.contains(aabb)) {
-                southWest->insert(aabb, std::get<1>(object));
+                southWest->insert(aabb, object.value);
                 it = objects.erase(it);
             } else if (this->northWest->bounds.contains(aabb)) {
-                northWest->insert(aabb, std::get<1>(object));
+                northWest->insert(aabb, object.value);
                 it = objects.erase(it);
             } else {
                 it++;
@@ -80,13 +77,13 @@ public:
     // Constructor
     // `bounds` specifies the edges of the region that the quadtree covers.
     // `region_capacity` specifies the maximum number of objects in a single region.
-    Quadtree<MetadataType>(const AxisAlignedBoundingBox &bounds, unsigned int region_capacity) : bounds(bounds), region_capacity(region_capacity) {};
+    Quadtree<MetadataType>(const axisAlignedBoundingBox &bounds, unsigned int region_capacity) : bounds(bounds), region_capacity(region_capacity) {};
 
-    Quadtree<MetadataType>() : bounds(AxisAlignedBoundingBox()), region_capacity(0) {};
+    Quadtree<MetadataType>() : bounds(axisAlignedBoundingBox()), region_capacity(0) {};
 
     // This method inserts the given metadata and
     // AABB into the quadtree.
-    void insert(const AxisAlignedBoundingBox &aabb, const MetadataType &meta) {
+    void insert(const axisAlignedBoundingBox &aabb, const MetadataType &meta) {
         if (!this->bounds.contains(aabb)) return; // Throws exception
         if (!divided) {
             if (this->objects.size() < this->region_capacity) {
@@ -115,7 +112,7 @@ public:
         return divided;
     };
 
-    const AxisAlignedBoundingBox &getBounds() const {
+    const axisAlignedBoundingBox &getBounds() const {
         return bounds;
     }
 
@@ -123,7 +120,7 @@ public:
         return region_capacity;
     }
 
-    const std::vector<Object<MetadataType>> &getObjects() const {
+    const std::vector<object<MetadataType>> &getObjects() const {
         return objects;
     }
 
@@ -177,8 +174,8 @@ public:
     // The worst-case time-complexity of this method should be O(log(N)) for a Quadtree with N leaf nodes
     // TODO: You should decide the element type of the std::unordered_set
     // Your set should contain the AABB and the Metadata of all objects in the given region.
-    ObjectSet<MetadataType> query_region(const AxisAlignedBoundingBox &aabb) const {
-        ObjectSet<MetadataType> items = ObjectSet<MetadataType>();
+    std::unordered_set<object<MetadataType>> query_region(const axisAlignedBoundingBox &aabb) const {
+        std::unordered_set<object<MetadataType>> items = std::unordered_set<object<MetadataType>>();
 
         // The region to query is not in this (section) of the quadtree
         if (!collides(this->bounds, aabb)){
@@ -190,8 +187,8 @@ public:
         auto objectIt = this->objects.begin();
         while (objectIt != this->objects.end()) {
             auto object = *objectIt;
-            AxisAlignedBoundingBox box = std::get<0>(object);
-            MetadataType data = std::get<1>(object);
+            axisAlignedBoundingBox box = object.box;
+            MetadataType data = object.value;
             if (collides(aabb, box)) {
                 items.insert(data);
             }

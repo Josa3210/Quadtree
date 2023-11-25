@@ -8,27 +8,27 @@
 #include <tuple>
 #include <set>
 #include <ostream>
-#include "Point.h"
+#include "point.h"
 
 // This class represents an axis-aligned bounding box
 // In a 2D problem, this is simply a rectangle whose sides are
 // parallel to the X- and Y-axis
-class AxisAlignedBoundingBox {
+class axisAlignedBoundingBox {
     friend class QuadTree;
 private:
-    Point origin;                           // The center of the rectangle
+    point origin;                           // The center of the rectangle
     double length;                          // The half length of the rectangle (x-axis)
     double height;                          // The half height of the rectangle (y-axis)
 
 public:
     // Constructor
-    AxisAlignedBoundingBox(Point origin, double length, double height);
-    AxisAlignedBoundingBox();
+    axisAlignedBoundingBox(point origin, double length, double height);
+    axisAlignedBoundingBox();
 
     // Getters and setters
-    const Point &getOrigin() const;
+    const point &getOrigin() const;
 
-    void setOrigin(const Point &newOrigin);
+    void setOrigin(const point &newOrigin);
 
     double getLength() const;
 
@@ -38,23 +38,23 @@ public:
 
     void setHeight(double newHeight);
 
-    bool collides(const AxisAlignedBoundingBox &two);
+    bool collides(const axisAlignedBoundingBox &two);
 
-    bool contains(const AxisAlignedBoundingBox &box);
-    bool contains(const Point &point);
+    bool contains(const axisAlignedBoundingBox &box);
+    bool contains(const point &point);
 
-    friend std::ostream &operator<<(std::ostream &os, const AxisAlignedBoundingBox &box);
+    friend std::ostream &operator<<(std::ostream &os, const axisAlignedBoundingBox &box);
 
     // This friend function (A free function that can access private fields) should check if two AABBs overlap
     // It returns true if there is overlap, false if there isn’t
     friend bool collides(
-            const AxisAlignedBoundingBox &one,
-            const AxisAlignedBoundingBox &two
+            const axisAlignedBoundingBox &one,
+            const axisAlignedBoundingBox &two
     );
 
-    bool operator==(const AxisAlignedBoundingBox &rhs) const;
+    bool operator==(const axisAlignedBoundingBox &rhs) const;
 
-    bool operator!=(const AxisAlignedBoundingBox &rhs) const;
+    bool operator!=(const axisAlignedBoundingBox &rhs) const;
 };
 
 
