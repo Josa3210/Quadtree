@@ -10,8 +10,13 @@
 #include <ostream>
 #include <utility>
 #include <unordered_set>
+#include <list>
 #include "AxisAlignedBoundingBox.h"
-#include "QuadTreeSet.h"
+#include "unordered_set_extension.h"
+
+template<typename MetadataType> using Object = std::tuple<AxisAlignedBoundingBox, MetadataType>;
+
+template<typename MetadataType> using ObjectSet = std::unordered_set<MetadataType>;
 
 // This class is our actual quadtree
 // It stores AABB’s together with some metadata
@@ -22,7 +27,7 @@ private:
     AxisAlignedBoundingBox bounds;
     unsigned int region_capacity;
 
-    std::vector<std::tuple<AxisAlignedBoundingBox, MetadataType>> objects;
+    std::vector<Object<MetadataType>> objects;
 
     bool divided = false;
 
@@ -118,7 +123,7 @@ public:
         return region_capacity;
     }
 
-    const std::vector<std::tuple<AxisAlignedBoundingBox, MetadataType>> &getObjects() const {
+    const std::vector<Object<MetadataType>> &getObjects() const {
         return objects;
     }
 
@@ -172,29 +177,33 @@ public:
     // The worst-case time-complexity of this method should be O(log(N)) for a Quadtree with N leaf nodes
     // TODO: You should decide the element type of the std::unordered_set
     // Your set should contain the AABB and the Metadata of all objects in the given region.
-    std::unordered_set<MetadataType, AxisAlignedBoundingBox> query_region(const AxisAlignedBoundingBox &aabb) const {
-        std::unordered_set<MetadataType, AxisAlignedBoundingBox> items = std::unordered_set<MetadataType, AxisAlignedBoundingBox>();
+    ObjectSet<MetadataType> query_region(const AxisAlignedBoundingBox &aabb) const {
+        ObjectSet<MetadataType> items = ObjectSet<MetadataType>();
 
         // The region to query is not in this (section) of the quadtree
-        if (!collides(this->bounds, aabb)) return;
+        if (!collides(this->bounds, aabb)){
+            return {};
+        }
 
         // Gather all child in this region and ones that collide with it
         // --> Even if 1 single point is in the queried region, it might be possible that an aabb collides with it
         auto objectIt = this->objects.begin();
         while (objectIt != this->objects.end()) {
             auto object = *objectIt;
-            if (collides(aabb, std::get<0>(object))) {
-                items.insert(object);
-            };
+            AxisAlignedBoundingBox box = std::get<0>(object);
+            MetadataType data = std::get<1>(object);
+            if (collides(aabb, box)) {
+                items.insert(data);
+            }
             objectIt++;
         }
 
-        if (!this->isDivided()) return;
+        if (!this->isDivided()) return items;
 
-        items.insert(this->getNorthEast()->query_region(aabb));
-        items.insert(this->getSouthEast()->query_region(aabb));
-        items.insert(this->getSouthWest()->query_region(aabb));
-        items.insert(this->getNorthWest()->query_region(aabb));
+        merge(items, this->getNorthEast()->query_region(aabb));
+        merge(items, this->getSouthEast()->query_region(aabb));
+        merge(items, this->getSouthWest()->query_region(aabb));
+        merge(items, this->getNorthWest()->query_region(aabb));
 
         return items;
     }

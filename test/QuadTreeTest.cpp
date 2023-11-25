@@ -5,6 +5,7 @@
 #include <iostream>
 #include "QuadTree.h"
 #include "catch.hpp"
+#include "unordered_set_extension.h"
 
 TEST_CASE("Test creation of QuadTree") {
     Quadtree<std::string> quadtree1 = Quadtree<std::string>();
@@ -88,9 +89,9 @@ TEST_CASE("Division of QuadTree when capacity is full") {
     quadtree.show("");
 }
 
-TEST_CASE("Querying region in Quadtree") {
+TEST_CASE("Querying region in Quadtree without division") {
     AxisAlignedBoundingBox boxqt = AxisAlignedBoundingBox({100, 100}, 100, 100);
-    Quadtree<std::string> quadtree = Quadtree<std::string>(boxqt, 4);
+    Quadtree<std::string> quadtree = Quadtree<std::string>(boxqt, 10);
 
 
     // Will end up in north-east quadrant
@@ -111,11 +112,56 @@ TEST_CASE("Querying region in Quadtree") {
 
     REQUIRE_FALSE(quadtree.isDivided());
 
-    AxisAlignedBoundingBox toQueryRegion = AxisAlignedBoundingBox({50,50},50,50);
+    AxisAlignedBoundingBox toQueryRegion = AxisAlignedBoundingBox({150, 50}, 50, 50);
     auto items = quadtree.query_region(toQueryRegion);
 
-    // Will collide with multiple quadtrees, so will end up in parent
-    AxisAlignedBoundingBox testBox5 = AxisAlignedBoundingBox({101, 101}, 5, 5);
+    REQUIRE(items.size() == 1);
+    REQUIRE(items.count("TestBox1") == 1);
+
+    toQueryRegion.setOrigin({150, 150});
+    items = quadtree.query_region(toQueryRegion);
+
+    REQUIRE(items.size() == 1);
+    REQUIRE(items.count("TestBox2") == 1);
+
+    toQueryRegion.setOrigin({50, 150});
+    items = quadtree.query_region(toQueryRegion);
+
+    REQUIRE(items.size() == 1);
+    REQUIRE(items.count("TestBox3") == 1);
+
+    toQueryRegion.setOrigin({50, 50});
+    items = quadtree.query_region(toQueryRegion);
+
+    REQUIRE(items.size() == 1);
+    REQUIRE(items.count("TestBox4") == 1);
+
+    // Add another aabb in the northeast quadrant that does not touch TestBox1
+    AxisAlignedBoundingBox testBox5 = AxisAlignedBoundingBox({130, 30}, 5, 5);
     quadtree.insert(testBox5, "TestBox5");
 
+    toQueryRegion.setOrigin({150, 50});
+    items = quadtree.query_region(toQueryRegion);
+
+    REQUIRE(items.size() == 2);
+    REQUIRE(items.count("TestBox1") == 1);
+    REQUIRE(items.count("TestBox5") == 1);
+
+    // Add another aabb overlapping between south-east and south-west
+    AxisAlignedBoundingBox testBox6 = AxisAlignedBoundingBox({100, 130}, 5, 5);
+    quadtree.insert(testBox6, "TestBox6");
+
+    // If everything is right, both sets must contain TestBox 6
+    toQueryRegion.setOrigin({150, 150});
+    auto items1 = quadtree.query_region(toQueryRegion);
+    toQueryRegion.setOrigin({50, 150});
+    auto items2 = quadtree.query_region(toQueryRegion);
+
+    REQUIRE(items1.size() == 2);
+    REQUIRE(items1.count("TestBox2") == 1);
+    REQUIRE(items1.count("TestBox6") == 1);
+
+    REQUIRE(items2.size() == 2);
+    REQUIRE(items2.count("TestBox3") == 1);
+    REQUIRE(items2.count("TestBox6") == 1);
 }
