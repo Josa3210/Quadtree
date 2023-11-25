@@ -165,3 +165,48 @@ TEST_CASE("Querying region in Quadtree without division") {
     REQUIRE(items2.count("TestBox3") == 1);
     REQUIRE(items2.count("TestBox6") == 1);
 }
+
+TEST_CASE("Querying region with split quadtree") {
+    AxisAlignedBoundingBox boxqt = AxisAlignedBoundingBox({100, 100}, 100, 100);
+    Quadtree<std::string> quadtree = Quadtree<std::string>(boxqt, 1);
+
+    // Will end up in north-east quadrant
+    AxisAlignedBoundingBox testBox1 = AxisAlignedBoundingBox({150, 50}, 10, 10);
+    quadtree.insert(testBox1, "TestBox1");
+
+    REQUIRE_FALSE(quadtree.isDivided());
+
+    AxisAlignedBoundingBox toQueryRegion = AxisAlignedBoundingBox({100, 100}, 100, 100);
+    auto items = quadtree.query_region(toQueryRegion);
+
+    REQUIRE(items.size() == 1);
+    REQUIRE(items.count("TestBox1"));
+
+    // Will end up in north-east quadrant
+    AxisAlignedBoundingBox testBox2 = AxisAlignedBoundingBox({150, 150}, 10, 10);
+    quadtree.insert(testBox2, "TestBox2");
+
+    items = quadtree.query_region(toQueryRegion);
+
+    REQUIRE(quadtree.isDivided());
+    REQUIRE(items.size() == 2);
+
+    REQUIRE(items.count("TestBox1"));
+    REQUIRE(items.count("TestBox2"));
+
+    // Will end up in the object list of the parent
+    AxisAlignedBoundingBox testBox3 = AxisAlignedBoundingBox({100, 150}, 10, 10);
+    quadtree.insert(testBox3, "TestBox3");
+
+    items = quadtree.query_region(toQueryRegion);
+
+    REQUIRE(std::get<1>(quadtree.getObjects().at(0)) == "TestBox3");
+
+    REQUIRE(quadtree.isDivided());
+    REQUIRE(items.size() == 3);
+
+    REQUIRE(items.count("TestBox1"));
+    REQUIRE(items.count("TestBox2"));
+    REQUIRE(items.count("TestBox3"));
+
+}

@@ -200,10 +200,10 @@ public:
 
         if (!this->isDivided()) return items;
 
-        merge(items, this->getNorthEast()->query_region(aabb));
-        merge(items, this->getSouthEast()->query_region(aabb));
-        merge(items, this->getSouthWest()->query_region(aabb));
-        merge(items, this->getNorthWest()->query_region(aabb));
+        items = merge(items, this->getNorthEast()->query_region(aabb));
+        items = merge(items, this->getSouthEast()->query_region(aabb));
+        items = merge(items, this->getSouthWest()->query_region(aabb));
+        items = merge(items, this->getNorthWest()->query_region(aabb));
 
         return items;
     }

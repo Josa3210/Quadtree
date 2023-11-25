@@ -5,17 +5,30 @@
 #ifndef QUADTREE_UNORDERED_SET_EXTENSION_H
 #define QUADTREE_UNORDERED_SET_EXTENSION_H
 
-template<typename T1, typename T2>
-void merge(std::unordered_set<T1, T2> set1, std::unordered_set<T1, T2> set2) {
+#include "unordered_set"
+
+template<typename T1>
+std::unordered_set<T1> merge(std::unordered_set<T1> set1, std::unordered_set<T1> set2) {
+
+    std::unordered_set<T1> set;
+
     auto it = set2.begin();
     while (it != set2.end()) {
-        set1.insert(*it);
+        set.insert(*it);
         it++;
     }
+
+    it = set1.begin();
+    while (it != set1.end()) {
+        set.insert(*it);
+        it++;
+    }
+
+    return set;
 }
 
-template<typename T1, typename T2>
-void show(std::unordered_set<T1, T2> set1) {
+template <typename T1>
+void show(std::unordered_set<T1> &set1) {
     for (auto it = set1.begin(); it != set1.end(); it++) {
         std::cout << *it << ", ";
     }
