@@ -9,8 +9,9 @@
 #include <vector>
 #include <ostream>
 #include <utility>
+#include <unordered_set>
 #include "AxisAlignedBoundingBox.h"
-
+#include "QuadTreeSet.h"
 
 // This class is our actual quadtree
 // It stores AABB’s together with some metadata
@@ -23,7 +24,7 @@ private:
 
     std::vector<std::tuple<AxisAlignedBoundingBox, MetadataType>> objects;
 
-    bool subdivided = false;
+    bool divided = false;
 
     Quadtree<MetadataType> *northEast = nullptr;
     Quadtree<MetadataType> *southEast = nullptr;
@@ -44,7 +45,7 @@ private:
         AxisAlignedBoundingBox nw = AxisAlignedBoundingBox(origin + Point(-length / 2, -height / 2), length / 2, height / 2);
         this->northWest = new Quadtree<MetadataType>(nw, this->region_capacity);
 
-        this->subdivided = true;
+        this->divided = true;
     };
 
     void redivide() {
@@ -54,13 +55,13 @@ private:
             AxisAlignedBoundingBox aabb = std::get<0>(object);
             if (this->northEast->bounds.contains(aabb)) {
                 northEast->insert(aabb, std::get<1>(object));
-               it = objects.erase(it);
+                it = objects.erase(it);
             } else if (this->southEast->bounds.contains(aabb)) {
                 southEast->insert(aabb, std::get<1>(object));
-               it = objects.erase(it);
+                it = objects.erase(it);
             } else if (this->southWest->bounds.contains(aabb)) {
                 southWest->insert(aabb, std::get<1>(object));
-               it = objects.erase(it);
+                it = objects.erase(it);
             } else if (this->northWest->bounds.contains(aabb)) {
                 northWest->insert(aabb, std::get<1>(object));
                 it = objects.erase(it);
@@ -82,7 +83,7 @@ public:
     // AABB into the quadtree.
     void insert(const AxisAlignedBoundingBox &aabb, const MetadataType &meta) {
         if (!this->bounds.contains(aabb)) return; // Throws exception
-        if (!subdivided) {
+        if (!divided) {
             if (this->objects.size() < this->region_capacity) {
                 this->objects.push_back({aabb, meta});
             } else {
@@ -105,8 +106,8 @@ public:
         }
     };
 
-    bool isSubdivided() const {
-        return subdivided;
+    bool isDivided() const {
+        return divided;
     };
 
     const AxisAlignedBoundingBox &getBounds() const {
@@ -137,32 +138,65 @@ public:
         return northWest;
     }
 
-    void show(std::string str){
+    void show(std::string str) {
         str += "  ";
-        std::cout<<str<<"Quadtree:" << std::endl;
-        std::cout<<str<<"Bounds( Origin: (" << this->bounds.getOrigin().getX() << ", " << this->bounds.getOrigin().getY()<< "), Length: " << this->bounds.getLength() << ", Height: " << this->bounds.getHeight() << std::endl;
-        std::cout<<str<<"Objects: ";
+        std::cout << str << "Quadtree:" << std::endl;
+        std::cout << str << "Bounds( Origin: (" << this->bounds.getOrigin().getX() << ", " << this->bounds.getOrigin().getY() << "), Length: " << this->bounds.getLength() << ", Height: "
+                  << this->bounds.getHeight() << std::endl;
+        std::cout << str << "Objects: ";
         auto it = this->objects.begin();
-        while(it != objects.end()){
-            std::cout<<"("<< std::get<0>(*it)<<", " << std::get<1>(*it) <<"), ";
+        while (it != objects.end()) {
+            std::cout << "(" << std::get<0>(*it) << ", " << std::get<1>(*it) << "), ";
             it++;
         }
         std::cout << std::endl;
-        if (this->isSubdivided()) {
-            std::cout<<str<<"Is divided: "<<std::endl;
+        if (this->isDivided()) {
+            std::cout << str << "Is divided: " << std::endl;
             this->getNorthEast()->show(str);
             this->getSouthEast()->show(str);
             this->getSouthWest()->show(str);
             this->getNorthWest()->show(str);
         } else {
-            std::cout<<str<<"Is not divided" << std::endl;
+            std::cout << str << "Is not divided" << std::endl;
         }
     }
 
     friend std::ostream &operator<<(std::ostream &os, const Quadtree &quadtree) {
-        os << "bounds: " << quadtree.bounds << ", region_capacity: " << quadtree.region_capacity << ", subdivided: " << quadtree.subdivided << ", northEast: " << quadtree.northEast << ", southEast: "
+        os << "bounds: " << quadtree.bounds << ", region_capacity: " << quadtree.region_capacity << ", divided: " << quadtree.divided << ", northEast: " << quadtree.northEast << ", southEast: "
            << quadtree.southEast << ", southWest: " << quadtree.southWest << ", northWest: " << quadtree.northWest;
         return os;
+    }
+
+    // This method should return a std::unordered_set of all items inside the given AABB.
+    // The given AABB may span multiple square regions of the quadtree.
+    // The worst-case time-complexity of this method should be O(log(N)) for a Quadtree with N leaf nodes
+    // TODO: You should decide the element type of the std::unordered_set
+    // Your set should contain the AABB and the Metadata of all objects in the given region.
+    std::unordered_set<MetadataType, AxisAlignedBoundingBox> query_region(const AxisAlignedBoundingBox &aabb) const {
+        std::unordered_set<MetadataType, AxisAlignedBoundingBox> items = std::unordered_set<MetadataType, AxisAlignedBoundingBox>();
+
+        // The region to query is not in this (section) of the quadtree
+        if (!collides(this->bounds, aabb)) return;
+
+        // Gather all child in this region and ones that collide with it
+        // --> Even if 1 single point is in the queried region, it might be possible that an aabb collides with it
+        auto objectIt = this->objects.begin();
+        while (objectIt != this->objects.end()) {
+            auto object = *objectIt;
+            if (collides(aabb, std::get<0>(object))) {
+                items.insert(object);
+            };
+            objectIt++;
+        }
+
+        if (!this->isDivided()) return;
+
+        items.insert(this->getNorthEast()->query_region(aabb));
+        items.insert(this->getSouthEast()->query_region(aabb));
+        items.insert(this->getSouthWest()->query_region(aabb));
+        items.insert(this->getNorthWest()->query_region(aabb));
+
+        return items;
     }
 };
 
