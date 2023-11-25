@@ -6,8 +6,9 @@
 #include <utility>
 
 
-AxisAlignedBoundingBox::AxisAlignedBoundingBox(Point origin, double length, double height)
-        : origin(origin), length(length), height(height) {}
+AxisAlignedBoundingBox::AxisAlignedBoundingBox(Point origin, double length, double height) : origin(origin), length(length), height(height) {}
+
+AxisAlignedBoundingBox::AxisAlignedBoundingBox() : origin(Point(0, 0)), length(0), height(0) {};
 
 const Point &AxisAlignedBoundingBox::getOrigin() const {
     return origin;
@@ -34,7 +35,7 @@ void AxisAlignedBoundingBox::setHeight(double newHeight) {
 }
 
 std::ostream &operator<<(std::ostream &os, const AxisAlignedBoundingBox &box) {
-    os << "origin: " << box.origin << ", length: " << box.length << ", height: " << box.height;
+    os << "AABB(origin: " << box.origin << ", length: " << box.length << ", height: " << box.height << ")";
     return os;
 }
 
@@ -44,37 +45,40 @@ std::ostream &operator<<(std::ostream &os, const AxisAlignedBoundingBox &box) {
 //
 // Based on: https://www.geeksforgeeks.org/find-two-rectangles-overlap/
 bool collides(const AxisAlignedBoundingBox &one, const AxisAlignedBoundingBox &two) {
-    Point oneLU = one.getOrigin();  // The upper left point of the first rectangle
+    Point oneLU = one.getOrigin() + Point(-one.length, -one.height);  // The upper left point of the first rectangle
     Point oneRD = one.getOrigin() + Point(one.length, one.height);  // The lower right point of the first rectangle
 
-    Point twoLU = two.getOrigin();  // The upper left point of the second rectangle
+    Point twoLU = two.getOrigin() + Point(-two.length, -two.height);// The upper left point of the second rectangle
     Point twoRD = two.getOrigin() + Point(two.length, two.height);  // The lower right point of the second rectangle
 
-    if (oneRD.isLeft(twoLU) or twoRD.isLeft(oneLU)) {
-        return false;
-    }
-
-    if (oneRD.isLower(twoLU) or twoRD.isLower(oneLU)) {
-        return false;
-    }
-
-    return true;
+    return !(oneRD.isLeft(twoLU) or twoRD.isLeft(oneLU) or oneLU.isLower(twoRD) or twoLU.isLower(oneRD));
 }
 
 bool AxisAlignedBoundingBox::collides(const AxisAlignedBoundingBox &two) {
-    Point oneLU = this->getOrigin();  // The upper left point of the first rectangle
-    Point oneRD = this->getOrigin() + Point(this->getLength(), this->getHeight());  // The lower right point of the first rectangle
+    Point oneLU = this->getOrigin() + Point(-length, -height);  // The upper left point of the first rectangle
+    Point oneRD = this->getOrigin() + Point(length, height);  // The lower right point of the first rectangle
 
-    Point twoLU = two.getOrigin();  // The upper left point of the second rectangle
-    Point twoRD = two.getOrigin() + Point(two.getLength(), two.getHeight());  // The lower right point of the second rectangle
+    Point twoLU = two.getOrigin() + Point(-two.length, -two.height);// The upper left point of the second rectangle
+    Point twoRD = two.getOrigin() + Point(two.length, two.height);  // The lower right point of the second rectangle
 
-    if (oneRD.isLeft(twoLU) or twoRD.isLeft(oneLU)) {
-        return false;
-    }
-
-    if (oneLU.isLower(twoRD) or twoLU.isLower(oneRD)) {
-        return false;
-    }
-
-    return true;
+    return !(oneRD.isLeft(twoLU) or twoRD.isLeft(oneLU) or oneLU.isLower(twoRD) or twoLU.isLower(oneRD));
 }
+
+bool AxisAlignedBoundingBox::contains(const AxisAlignedBoundingBox &box) {
+    Point boxOrigin = box.getOrigin();
+
+    return (this->contains(boxOrigin + Point(box.length, box.height)) and (this->contains(boxOrigin + Point(-box.length, -box.height))));
+}
+
+bool AxisAlignedBoundingBox::contains(const Point &point) {
+    return ((point.getX() < origin.getX() + length) and (point.getX() > origin.getX() - length) and (point.getY() < origin.getY() + height) and (point.getY() > origin.getY() - height));
+}
+
+bool AxisAlignedBoundingBox::operator==(const AxisAlignedBoundingBox &rhs) const {
+    return origin == rhs.origin && length == rhs.length && height == rhs.height;
+}
+
+bool AxisAlignedBoundingBox::operator!=(const AxisAlignedBoundingBox &rhs) const {
+    return !(rhs == *this);
+}
+
