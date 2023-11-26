@@ -5,8 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_library(QuadtreeLib STATIC
         "src/axisAlignedBoundingBox.cpp"
-        "src/point.cpp"
-        "src/object.cpp" src/quadtree.cpp)
+        "src/point.cpp")
 
 add_executable(TestSuite
         "test/main.cpp"

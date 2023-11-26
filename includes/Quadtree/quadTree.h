@@ -15,6 +15,8 @@
 #include "unordered_set_extension.h"
 #include "object.h"
 
+template<typename MetadataType> using objectSet = std::unordered_set<object<MetadataType>, object_hash<MetadataType>>;
+
 // This class is our actual quadtree
 // It stores AABB’s together with some metadata
 // Space Complexity: O(N)
@@ -53,19 +55,19 @@ private:
     void redivide() {
         auto it = objects.begin();
         while (it != objects.end()) {
-            std::tuple<axisAlignedBoundingBox, MetadataType> object = *it;
+            object<MetadataType> object = *it;
             axisAlignedBoundingBox aabb = object.box;
             if (this->northEast->bounds.contains(aabb)) {
-                northEast->insert(aabb, object.value);
+                northEast->insert(object);
                 it = objects.erase(it);
             } else if (this->southEast->bounds.contains(aabb)) {
-                southEast->insert(aabb, object.value);
+                southEast->insert(object);
                 it = objects.erase(it);
             } else if (this->southWest->bounds.contains(aabb)) {
-                southWest->insert(aabb, object.value);
+                southWest->insert(object);
                 it = objects.erase(it);
             } else if (this->northWest->bounds.contains(aabb)) {
-                northWest->insert(aabb, object.value);
+                northWest->insert(object);
                 it = objects.erase(it);
             } else {
                 it++;
@@ -83,62 +85,47 @@ public:
 
     // This method inserts the given metadata and
     // AABB into the quadtree.
-    void insert(const axisAlignedBoundingBox &aabb, const MetadataType &meta) {
+    void insert(object<MetadataType> object) {
+        axisAlignedBoundingBox aabb = object.box;
         if (!this->bounds.contains(aabb)) return; // Throws exception
         if (!divided) {
             if (this->objects.size() < this->region_capacity) {
-                this->objects.push_back({aabb, meta});
+                this->objects.push_back(object);
             } else {
-                this->objects.push_back({aabb, meta});
+                this->objects.push_back(object);
                 divide();
                 redivide();
             }
         } else {
             if (this->northEast->bounds.contains(aabb)) {
-                northEast->insert(aabb, meta);
+                northEast->insert(object);
             } else if (this->southEast->bounds.contains(aabb)) {
-                southEast->insert(aabb, meta);
+                southEast->insert(object);
             } else if (this->southWest->bounds.contains(aabb)) {
-                southWest->insert(aabb, meta);
+                southWest->insert(object);
             } else if (this->northWest->bounds.contains(aabb)) {
-                northWest->insert(aabb, meta);
+                northWest->insert(object);
             } else {
-                this->objects.push_back({aabb, meta});
+                this->objects.push_back(object);
             }
         }
     };
 
-    bool isDivided() const {
-        return divided;
-    };
+    [[nodiscard]] bool isDivided() const { return divided; };
 
-    const axisAlignedBoundingBox &getBounds() const {
-        return bounds;
-    }
+    [[nodiscard]] const axisAlignedBoundingBox &getBounds() const { return bounds; }
 
-    unsigned int getRegionCapacity() const {
-        return region_capacity;
-    }
+    [[nodiscard]] unsigned int getRegionCapacity() const { return region_capacity; }
 
-    const std::vector<object<MetadataType>> &getObjects() const {
-        return objects;
-    }
+    const std::vector<object<MetadataType>> &getObjects() const { return objects; }
 
-    Quadtree<MetadataType> *getNorthEast() const {
-        return northEast;
-    }
+    Quadtree<MetadataType> *getNorthEast() const { return northEast; }
 
-    Quadtree<MetadataType> *getSouthEast() const {
-        return southEast;
-    }
+    Quadtree<MetadataType> *getSouthEast() const { return southEast; }
 
-    Quadtree<MetadataType> *getSouthWest() const {
-        return southWest;
-    }
+    Quadtree<MetadataType> *getSouthWest() const { return southWest; }
 
-    Quadtree<MetadataType> *getNorthWest() const {
-        return northWest;
-    }
+    Quadtree<MetadataType> *getNorthWest() const { return northWest; }
 
     void show(std::string str) {
         str += "  ";
@@ -146,9 +133,10 @@ public:
         std::cout << str << "Bounds( Origin: (" << this->bounds.getOrigin().getX() << ", " << this->bounds.getOrigin().getY() << "), Length: " << this->bounds.getLength() << ", Height: "
                   << this->bounds.getHeight() << std::endl;
         std::cout << str << "Objects: ";
-        auto it = this->objects.begin();
+        auto it = objects.begin();
         while (it != objects.end()) {
-            std::cout << "(" << std::get<0>(*it) << ", " << std::get<1>(*it) << "), ";
+            object<MetadataType> object = *it;
+            std::cout << "(" << object.box << ", " << object.value << "), ";
             it++;
         }
         std::cout << std::endl;
@@ -174,23 +162,23 @@ public:
     // The worst-case time-complexity of this method should be O(log(N)) for a Quadtree with N leaf nodes
     // TODO: You should decide the element type of the std::unordered_set
     // Your set should contain the AABB and the Metadata of all objects in the given region.
-    std::unordered_set<object<MetadataType>> query_region(const axisAlignedBoundingBox &aabb) const {
-        std::unordered_set<object<MetadataType>> items = std::unordered_set<object<MetadataType>>();
+    objectSet<MetadataType> query_region(const axisAlignedBoundingBox &aabb) const {
+        objectSet<MetadataType> items = {};
 
         // The region to query is not in this (section) of the quadtree
-        if (!collides(this->bounds, aabb)){
+        if (!collides(this->bounds, aabb)) {
             return {};
         }
 
         // Gather all child in this region and ones that collide with it
         // --> Even if 1 single point is in the queried region, it might be possible that an aabb collides with it
-        auto objectIt = this->objects.begin();
+        auto objectIt = objects.begin();
         while (objectIt != this->objects.end()) {
-            auto object = *objectIt;
+            object<MetadataType> object = *objectIt;
             axisAlignedBoundingBox box = object.box;
             MetadataType data = object.value;
             if (collides(aabb, box)) {
-                items.insert(data);
+                items.insert(object);
             }
             objectIt++;
         }
