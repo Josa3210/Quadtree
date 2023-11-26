@@ -19,6 +19,10 @@ struct object {
 
     void setValue(MetadataType value);
 
+    bool operator==(const object &rhs) const;
+
+    bool operator!=(const object &rhs) const;
+
     axisAlignedBoundingBox box;
     MetadataType value;
 };

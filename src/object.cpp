@@ -12,8 +12,8 @@ const axisAlignedBoundingBox &object<MetadataType>::getBox() const {
 }
 
 template<typename MetadataType>
-void object<MetadataType>::setBox(const axisAlignedBoundingBox &box) {
-    object::box = box;
+void object<MetadataType>::setBox(const axisAlignedBoundingBox &newBox) {
+    object::box = newBox;
 }
 
 template<typename MetadataType>
@@ -22,6 +22,16 @@ MetadataType object<MetadataType>::getValue() const {
 }
 
 template<typename MetadataType>
-void object<MetadataType>::setValue(MetadataType value) {
-    object::value = value;
+void object<MetadataType>::setValue(MetadataType newValue) {
+    object::value = newValue;
+}
+
+template<typename MetadataType>
+bool object<MetadataType>::operator==(const object &rhs) const {
+    return box == rhs.box && value == rhs.value;
+}
+
+template<typename MetadataType>
+bool object<MetadataType>::operator!=(const object &rhs) const {
+    return rhs != *this;
 }

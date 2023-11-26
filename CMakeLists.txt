@@ -5,12 +5,14 @@ set(CMAKE_CXX_STANDARD 17)
 
 add_library(QuadtreeLib STATIC
         "src/axisAlignedBoundingBox.cpp"
-        "src/point.cpp" includes/Quadtree/object.h src/object.cpp)
+        "src/point.cpp"
+        "src/object.cpp" src/quadtree.cpp)
 
 add_executable(TestSuite
         "test/main.cpp"
         "test/axisAlignedBoundingBoxTest.cpp"
-        "test/quadTreeTest.cpp" test/unordered_set_extensionTest.cpp)
+        "test/quadTreeTest.cpp"
+        "test/unordered_set_extensionTest.cpp")
 
 target_include_directories(QuadtreeLib PRIVATE
         "includes/Quadtree")
