@@ -227,3 +227,59 @@ TEST_CASE("Querying region with split quadtree") {
     REQUIRE(items.count(object2));
     REQUIRE(items.count(object3));
 }
+
+TEST_CASE("Iterating over the quadtree"){
+    axisAlignedBoundingBox boundingBox = axisAlignedBoundingBox({100,100},100,100);
+    Quadtree<std::string> quadtree = Quadtree<std::string>(boundingBox,10);
+
+    // Will end up in north-east quadrant
+    axisAlignedBoundingBox testBox1 = axisAlignedBoundingBox({150, 50}, 10, 10);
+    object<std::string> object1 = object<std::string>(testBox1, "TestBox1");
+    quadtree.insert(object1);
+
+    // Will end up in south-east quadrant
+    axisAlignedBoundingBox testBox2 = axisAlignedBoundingBox({150, 150}, 10, 10);
+    object<std::string> object2 = object<std::string>(testBox2, "TestBox2");
+    quadtree.insert(object2);
+
+    // Will end up in the south-west quadrant
+    axisAlignedBoundingBox testBox3 = axisAlignedBoundingBox({50, 150}, 10, 10);
+    object<std::string> object3 = object<std::string>(testBox3, "TestBox3");
+    quadtree.insert(object3);
+
+    // Will end up in north-west quadrant
+    axisAlignedBoundingBox testBox4 = axisAlignedBoundingBox({50, 50}, 10, 10);
+    object<std::string> object4 = object<std::string>(testBox4, "TestBox4");
+    quadtree.insert(object4);
+
+    axisAlignedBoundingBox testBox6 = axisAlignedBoundingBox({100, 130}, 60, 60);
+    object<std::string> object6 = object<std::string>(testBox6, "TestBox6");
+    quadtree.insert(object6);
+
+    axisAlignedBoundingBox testBox7 = axisAlignedBoundingBox({40, 20}, 10, 10);
+    object<std::string> object7 = object<std::string>(testBox7, "TestBox7");
+    quadtree.insert(object7);
+
+    axisAlignedBoundingBox testBox8 = axisAlignedBoundingBox({160, 15}, 10, 10);
+    object<std::string> object8 = object<std::string>(testBox8, "TestBox8");
+    quadtree.insert(object8);
+
+    axisAlignedBoundingBox testBox9 = axisAlignedBoundingBox({70, 75}, 10, 10);
+    object<std::string> object9 = object<std::string>(testBox9, "TestBox9");
+    quadtree.insert(object9);
+
+    auto objIt = quadtree.getObjects().begin();
+    auto qtIt = quadtree.begin();
+    while (objIt != quadtree.getObjects().end()){
+        auto object = *objIt;
+        std::cout<<object<<std::endl;
+        auto qtObject = *qtIt;
+        std::cout<<qtObject<<std::endl;
+
+        REQUIRE(objIt == qtIt);
+        objIt++;
+        qtIt++;
+    }
+
+
+}

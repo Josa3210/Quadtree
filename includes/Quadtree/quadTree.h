@@ -14,6 +14,7 @@
 #include "axisAlignedBoundingBox.h"
 #include "unordered_set_extension.h"
 #include "object.h"
+#include "Iterator.h"
 
 template<typename MetadataType> using objectSet = std::unordered_set<object<MetadataType>, object_hash<MetadataType>>;
 
@@ -192,6 +193,10 @@ public:
 
         return items;
     }
+
+    typename std::vector<object<MetadataType>>::iterator begin() { return objects.begin(); }
+    typename std::vector<object<MetadataType>>::iterator end() { return objects.end(); }
+
 };
 
 

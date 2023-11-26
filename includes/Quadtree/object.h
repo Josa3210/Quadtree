@@ -6,6 +6,7 @@
 #define QUADTREE_OBJECT_H
 
 #include <cmath>
+#include <ostream>
 #include "axisAlignedBoundingBox.h"
 
 template<typename MetadataType>
@@ -14,7 +15,9 @@ struct object {
 
     bool operator==(const object &rhs) const { return box == rhs.box && value == rhs.value; };
 
-    bool operator!=(const object &rhs) const { return rhs != *this; };
+    bool operator!=(const object &rhs) const { return rhs != *this; }
+
+    friend std::ostream &operator<<(std::ostream &os, const object &object);;
 
     axisAlignedBoundingBox box;
     MetadataType value;
@@ -28,5 +31,11 @@ struct object_hash {
         return hash;
     }
 };
+
+template<typename MetadataType>
+std::ostream &operator<<(std::ostream &os, const object<MetadataType> &object) {
+    os << "(box: " << object.box << " value: " << object.value << ")";
+    return os;
+}
 
 #endif //QUADTREE_OBJECT_H
