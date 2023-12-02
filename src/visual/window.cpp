@@ -12,11 +12,12 @@ int main() {
     unsigned int windowHeight = 1200;
 
     // Create circles
-    int n = 10;
+    int n = 200;
+    int speed = 50;
     std::vector circleVec = std::vector<sf::CircleShape>();
     std::vector posVec = std::vector<sf::Vector2f>();
     for (int i = 0; i < n; i++) {
-        sf::Vector2f randpoint = sf::Vector2f(rand() % windowWidth, rand() % windowHeight);
+        sf::Vector2f randpoint = sf::Vector2f(rand() % (windowWidth - 200) + 100, rand() % (windowHeight - 200) + 100);
         sf::CircleShape circle = sf::CircleShape();
         circle.setPosition(randpoint);
         circle.setRadius(10);
@@ -41,7 +42,11 @@ int main() {
         window.clear(sf::Color::Black);
 
         //Draw circles
-        for (const sf::CircleShape& circle : circleVec){
+        for (sf::CircleShape circle: circleVec) {
+            sf::Vector2f pos = circle.getPosition();
+            pos.x += rand() % speed - speed / 2.;
+            pos.y += rand() % speed - speed / 2.;
+            circle.setPosition(pos);
             window.draw(circle);
         }
 
@@ -51,8 +56,4 @@ int main() {
     }
 
     return 0;
-}
-
-void updatePos(const std::vector<sf::Vector2f>& vector1) {
-
 }
