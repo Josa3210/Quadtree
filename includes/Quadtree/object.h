@@ -13,7 +13,7 @@ template<typename MetadataType>
 struct object {
     object(const axisAlignedBoundingBox &box, MetadataType value) : box(box), value(value) {};
 
-    bool operator==(const object &rhs) const { return box == rhs.box && value == rhs.value; };
+    bool operator==(const object &rhs) const { return box == rhs.box; };
 
     bool operator!=(const object &rhs) const { return rhs != *this; }
 

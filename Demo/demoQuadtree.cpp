@@ -9,20 +9,37 @@
 #include "quadTree.h"
 #include "RectangleObject.h"
 
-
 int main() {
     // create the window
     unsigned int windowWidth = 2000;
     unsigned int windowHeight = 1200;
     axisAlignedBoundingBox windowBox = axisAlignedBoundingBox(0,0,windowWidth,windowHeight);
 
-    // Create circles
-    int n = 20;
-    int speed = 50;
-    unsigned int fps = 30;
-    float rectSize = 50;
-    std::vector rectangles = std::vector<RectangleObject>();
 
+    // Create text object
+    sf::Font openSans;
+    openSans.loadFromFile("D:\\_Opslag\\Programmeren\\C++\\Quadtree\\res\\OpenSans-Medium.ttf");
+
+    sf::Text my_text = sf::Text(openSans);
+    my_text.setPosition({50,50});
+    my_text.setFillColor(sf::Color::White);
+    my_text.setCharacterSize(20);
+
+
+    // Create rectangles
+    int n = 100;
+    int speed = 30;
+    float rectSize = 10;
+
+    // Timing
+    long frames = 0;
+    unsigned int seconds = 5;
+    unsigned int fps = 30;
+    unsigned int maxFrames = seconds*fps;
+
+    long totalCollisions = 0;
+
+    std::vector<RectangleObject> rectangles;
     // Create squares
     for (int i = 0; i < n; i++) {
         RectangleObject newRectangle;
@@ -31,15 +48,17 @@ int main() {
         newRectangle.shape.setSize({rectSize, rectSize});
         newRectangle.shape.setPosition({randX, randY});
         newRectangle.boundingBox = axisAlignedBoundingBox({randX, randY}, rectSize, rectSize);
-        rectangles.push_back(newRectangle);
+
     }
 
-
+    // Create window
     sf::RenderWindow window(sf::VideoMode({windowWidth, windowHeight}), "Window1");
     window.setFramerateLimit(fps);
 
+
     // run the program as long as the window is open
     while (window.isOpen()) {
+
         // check all the window's events that were triggered since the last iteration of the loop
         sf::Event event;
         while (window.pollEvent(event)) {
@@ -49,9 +68,10 @@ int main() {
             }
         }
 
-        // clear the window with black color
-        window.clear(sf::Color::Black);
+        // Create quadtree for storing objects
+        Quadtree<sf::RectangleShape> qt = Quadtree<sf::RectangleShape>(windowBox, 5);
 
+        // Move the rectangles
         for (auto &rectangle: rectangles) {
             // Update position
             float deltaX = rand() % speed - speed / 2;
@@ -69,14 +89,29 @@ int main() {
                 testBox.move(deltaPoint);
             }
             rectangle.move(deltaPoint);
+
+            // Insert new object in qt
+            object<sf::RectangleShape> newObj = object<sf::RectangleShape>(rectangle.boundingBox,rectangle.shape);
+            qt.insert(newObj);
         }
 
+        // Check for collisions
+        int collisions = 0;
         for (auto &rectangle: rectangles) {
-            // Check collisions
-            for (auto &otherRect: rectangles) {
-                if (&rectangle != &otherRect && collides(rectangle.boundingBox, otherRect.boundingBox)) {
+            axisAlignedBoundingBox box = rectangle.boundingBox;
+            float newOriginX = box.getOrigin().getX() - 50;
+            float newOriginY = box.getOrigin().getY() - 50;
+            float newLength = box.getLength() + 50;
+            float newHeigth = box.getHeight() + 50;
+
+            axisAlignedBoundingBox queryRegion = axisAlignedBoundingBox(newOriginX,newOriginY,newLength,newHeigth);
+            auto otherRectangles = qt.query_region(queryRegion);
+            for (auto &otherRect: otherRectangles) {
+                collisions++;
+                if (&rectangle.boundingBox != &otherRect.box && collides(rectangle.boundingBox, otherRect.box)) {
                     rectangle.shape.setFillColor(sf::Color::Red);
-                    otherRect.shape.setFillColor(sf::Color::Red);
+                    sf::RectangleShape rect = otherRect.value;
+                    rect.setFillColor(sf::Color::Red);
                     break;
                 } else {
                     rectangle.shape.setFillColor(sf::Color::Green);
@@ -84,19 +119,26 @@ int main() {
             }
         }
 
-        window.clear();
+        // Calculate total collision calculations
+        totalCollisions += collisions;
+        my_text.setString("Total collision calculations: " + std::to_string(totalCollisions));
 
+
+        window.clear();
         for (const auto &rectangle: rectangles) {
             window.draw(rectangle.shape);
         }
-
+        window.draw(my_text);
         window.display();
 
-
-
-        // end the current frame
-        window.display();
-
+        frames += 1;
+        while (frames > maxFrames){
+            window.clear();
+            my_text.setPosition({(float) windowWidth/2-my_text.getGlobalBounds().width/2,(float) windowHeight/2 - my_text.getGlobalBounds().height/2});
+            my_text.setCharacterSize(50);
+            window.draw(my_text);
+            window.display();
+        }
     }
 
     return 0;
