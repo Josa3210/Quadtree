@@ -14,7 +14,6 @@
 #include "axisAlignedBoundingBox.h"
 #include "unordered_set_extension.h"
 #include "object.h"
-#include "Iterator.h"
 
 template<typename MetadataType> using objectSet = std::unordered_set<object<MetadataType>, object_hash<MetadataType>>;
 

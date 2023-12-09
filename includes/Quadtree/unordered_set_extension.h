@@ -7,6 +7,7 @@
 
 #include "unordered_set"
 #include "object.h"
+#include "iostream"
 
 template<typename T1>
 std::unordered_set<object<T1>,object_hash<T1>> merge(std::unordered_set<object<T1>,object_hash<T1>> set1, std::unordered_set<object<T1>,object_hash<T1>> set2) {

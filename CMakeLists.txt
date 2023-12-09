@@ -19,7 +19,7 @@ add_executable(TestSuite
         "test/unordered_set_extensionTest.cpp")
 
 add_executable(VisualDemo
-        "src/visual/window.cpp")
+        "Demo/demo.cpp")
 
 target_include_directories(QuadtreeLib PRIVATE
         "includes/Quadtree")
@@ -29,10 +29,10 @@ target_include_directories(TestSuite PRIVATE
         "includes/catch2")
 
 target_include_directories(VisualDemo PRIVATE
-        "includes/Quadtree"
-        "includes/SFML/Graphics.hpp")
+        "includes/Visual/"
+        "includes/Quadtree/")
 
 target_link_libraries(TestSuite PRIVATE QuadtreeLib)
-target_link_libraries(VisualDemo sfml-graphics)
+target_link_libraries(VisualDemo sfml-graphics QuadtreeLib)
 
 

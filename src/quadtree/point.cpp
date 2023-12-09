@@ -4,21 +4,21 @@
 
 #include "point.h"
 
-point::point(double x, double y) : x(x), y(y) {}
+point::point(float x, float y) : x(x), y(y) {}
 
-double point::getX() const {
+float point::getX() const {
     return x;
 }
 
-void point::setX(double x) {
+void point::setX(float x) {
     point::x = x;
 }
 
-double point::getY() const {
+float point::getY() const {
     return y;
 }
 
-void point::setY(double y) {
+void point::setY(float y) {
     point::y = y;
 }
 
@@ -37,8 +37,8 @@ std::ostream &operator<<(std::ostream &os, const point &point) {
 }
 
 point point::operator+(const point &rhs) const{
-    double newX = this->x + rhs.x;
-    double newY = this->y + rhs.y;
+    float newX = this->x + rhs.x;
+    float newY = this->y + rhs.y;
     return {newX,newY};
 }
 
@@ -48,4 +48,9 @@ bool point::isLower(const point &point) {
 
 bool point::isLeft(const point &point) {
     return (this->x < point.x);
+}
+
+void point::move(const point &point) {
+    this->x += point.getX();
+    this->y += point.getY();
 }

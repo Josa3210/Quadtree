@@ -6,9 +6,11 @@
 #include <utility>
 
 
-axisAlignedBoundingBox::axisAlignedBoundingBox(point origin, double length, double height) : origin(origin), length(length), height(height) {}
+axisAlignedBoundingBox::axisAlignedBoundingBox(point origin, float length, float height) : origin(origin), length(length), height(height) {}
 
 axisAlignedBoundingBox::axisAlignedBoundingBox() : origin(point(0, 0)), length(0), height(0) {};
+
+axisAlignedBoundingBox::axisAlignedBoundingBox(float originX, float originY, float length, float height) : origin(point(originX, originY)), height(height), length(length) {}
 
 const point &axisAlignedBoundingBox::getOrigin() const {
     return origin;
@@ -18,19 +20,19 @@ void axisAlignedBoundingBox::setOrigin(const point &newOrigin) {
     axisAlignedBoundingBox::origin = newOrigin;
 }
 
-double axisAlignedBoundingBox::getLength() const {
+float axisAlignedBoundingBox::getLength() const {
     return length;
 }
 
-void axisAlignedBoundingBox::setLength(double newLength) {
+void axisAlignedBoundingBox::setLength(float newLength) {
     axisAlignedBoundingBox::length = newLength;
 }
 
-double axisAlignedBoundingBox::getHeight() const {
+float axisAlignedBoundingBox::getHeight() const {
     return height;
 }
 
-void axisAlignedBoundingBox::setHeight(double newHeight) {
+void axisAlignedBoundingBox::setHeight(float newHeight) {
     axisAlignedBoundingBox::height = newHeight;
 }
 
@@ -45,20 +47,20 @@ std::ostream &operator<<(std::ostream &os, const axisAlignedBoundingBox &box) {
 //
 // Based on: https://www.geeksforgeeks.org/find-two-rectangles-overlap/
 bool collides(const axisAlignedBoundingBox &one, const axisAlignedBoundingBox &two) {
-    point oneLU = one.getOrigin() + point(-one.length, -one.height);  // The upper left point of the first rectangle
+    point oneLU = one.getOrigin();  // The upper left point of the first rectangle
     point oneRD = one.getOrigin() + point(one.length, one.height);  // The lower right point of the first rectangle
 
-    point twoLU = two.getOrigin() + point(-two.length, -two.height);// The upper left point of the second rectangle
+    point twoLU = two.getOrigin();// The upper left point of the second rectangle
     point twoRD = two.getOrigin() + point(two.length, two.height);  // The lower right point of the second rectangle
 
     return !(oneRD.isLeft(twoLU) or twoRD.isLeft(oneLU) or oneLU.isLower(twoRD) or twoLU.isLower(oneRD));
 }
 
 bool axisAlignedBoundingBox::collides(const axisAlignedBoundingBox &two) {
-    point oneLU = this->getOrigin() + point(-length, -height);  // The upper left point of the first rectangle
+    point oneLU = this->getOrigin();  // The upper left point of the first rectangle
     point oneRD = this->getOrigin() + point(length, height);  // The lower right point of the first rectangle
 
-    point twoLU = two.getOrigin() + point(-two.length, -two.height);// The upper left point of the second rectangle
+    point twoLU = two.getOrigin();// The upper left point of the second rectangle
     point twoRD = two.getOrigin() + point(two.length, two.height);  // The lower right point of the second rectangle
 
     return !(oneRD.isLeft(twoLU) or twoRD.isLeft(oneLU) or oneLU.isLower(twoRD) or twoLU.isLower(oneRD));
@@ -67,11 +69,11 @@ bool axisAlignedBoundingBox::collides(const axisAlignedBoundingBox &two) {
 bool axisAlignedBoundingBox::contains(const axisAlignedBoundingBox &box) {
     point boxOrigin = box.getOrigin();
 
-    return (this->contains(boxOrigin + point(box.length, box.height)) and (this->contains(boxOrigin + point(-box.length, -box.height))));
+    return (this->contains(boxOrigin) and (this->contains(boxOrigin + point(box.length, box.height))));
 }
 
 bool axisAlignedBoundingBox::contains(const point &point) {
-    return ((point.getX() < origin.getX() + length) and (point.getX() > origin.getX() - length) and (point.getY() < origin.getY() + height) and (point.getY() > origin.getY() - height));
+    return ((point.getX() <= origin.getX() + length) and (point.getX() >= origin.getX()) and (point.getY() <= origin.getY() + height) and (point.getY() >= origin.getY()));
 }
 
 bool axisAlignedBoundingBox::operator==(const axisAlignedBoundingBox &rhs) const {
@@ -80,5 +82,9 @@ bool axisAlignedBoundingBox::operator==(const axisAlignedBoundingBox &rhs) const
 
 bool axisAlignedBoundingBox::operator!=(const axisAlignedBoundingBox &rhs) const {
     return !(rhs == *this);
+}
+
+void axisAlignedBoundingBox::move(const point &point) {
+    this->origin.move(point);
 }
 

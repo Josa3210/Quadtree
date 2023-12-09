@@ -17,7 +17,10 @@ struct object {
 
     bool operator!=(const object &rhs) const { return rhs != *this; }
 
-    friend std::ostream &operator<<(std::ostream &os, const object &object);;
+    friend std::ostream &operator<<(std::ostream &os, const object<MetadataType> &object) {
+        os << "(box: " << object.box << " value: " << object.value << ")";
+        return os;
+    };
 
     axisAlignedBoundingBox box;
     MetadataType value;
@@ -31,11 +34,4 @@ struct object_hash {
         return hash;
     }
 };
-
-template<typename MetadataType>
-std::ostream &operator<<(std::ostream &os, const object<MetadataType> &object) {
-    os << "(box: " << object.box << " value: " << object.value << ")";
-    return os;
-}
-
 #endif //QUADTREE_OBJECT_H

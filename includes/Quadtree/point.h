@@ -10,22 +10,24 @@
 
 class point {
 private:
-    double x, y;
+    float x, y;
 
 public:
-    point(double x, double y);
+    point(float x, float y);
 
-    double getX() const;
+    float getX() const;
 
-    void setX(double x);
+    void setX(float x);
 
-    double getY() const;
+    float getY() const;
 
-    void setY(double y);
+    void setY(float y);
 
     bool isLower(const point &point);
 
     bool isLeft(const point &point);
+
+    void move(const point &point);
 
     friend std::ostream &operator<<(std::ostream &os, const point &point);
 
