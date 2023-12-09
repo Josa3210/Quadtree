@@ -14,6 +14,7 @@ int main() {
     // create the window
     unsigned int windowWidth = 2000;
     unsigned int windowHeight = 1200;
+    axisAlignedBoundingBox windowBox = axisAlignedBoundingBox(0,0,windowWidth,windowHeight);
 
     // Create circles
     int n = 20;
@@ -57,6 +58,16 @@ int main() {
             float deltaY = rand() % speed - speed / 2;
 
             point deltaPoint = point(deltaX, deltaY);
+            // check if position is not out of bounds
+            auto testBox = axisAlignedBoundingBox(rectangle.boundingBox);
+            testBox.move(deltaPoint);
+            while(!windowBox.contains(testBox)){
+                deltaX = rand() % speed - speed / 2;
+                deltaY = rand() % speed - speed / 2;
+                testBox = axisAlignedBoundingBox(rectangle.boundingBox);
+                deltaPoint = point(deltaX, deltaY);
+                testBox.move(deltaPoint);
+            }
             rectangle.move(deltaPoint);
         }
 
