@@ -13,7 +13,7 @@ int main() {
     // create the window
     unsigned int windowWidth = 2000;
     unsigned int windowHeight = 1200;
-    axisAlignedBoundingBox windowBox = axisAlignedBoundingBox(0,0,windowWidth,windowHeight);
+    axisAlignedBoundingBox windowBox = axisAlignedBoundingBox(0, 0, windowWidth, windowHeight);
 
 
     // Create text object
@@ -21,7 +21,7 @@ int main() {
     openSans.loadFromFile("D:\\_Opslag\\Programmeren\\C++\\Quadtree\\res\\OpenSans-Medium.ttf");
 
     sf::Text my_text = sf::Text(openSans);
-    my_text.setPosition({50,50});
+    my_text.setPosition({50, 50});
     my_text.setFillColor(sf::Color::White);
     my_text.setCharacterSize(20);
 
@@ -33,9 +33,9 @@ int main() {
 
     // Timing
     long frames = 0;
-    unsigned int seconds = 5;
+    unsigned int seconds = 10;
     unsigned int fps = 30;
-    unsigned int maxFrames = seconds*fps;
+    unsigned int maxFrames = seconds * fps;
 
     long totalCollisions = 0;
 
@@ -49,6 +49,7 @@ int main() {
         newRectangle.shape.setPosition({randX, randY});
         newRectangle.boundingBox = axisAlignedBoundingBox({randX, randY}, rectSize, rectSize);
 
+        rectangles.push_back(newRectangle);
     }
 
     // Create window
@@ -81,7 +82,7 @@ int main() {
             // check if position is not out of bounds
             auto testBox = axisAlignedBoundingBox(rectangle.boundingBox);
             testBox.move(deltaPoint);
-            while(!windowBox.contains(testBox)){
+            while (!windowBox.contains(testBox)) {
                 deltaX = rand() % speed - speed / 2;
                 deltaY = rand() % speed - speed / 2;
                 testBox = axisAlignedBoundingBox(rectangle.boundingBox);
@@ -91,7 +92,7 @@ int main() {
             rectangle.move(deltaPoint);
 
             // Insert new object in qt
-            object<sf::RectangleShape> newObj = object<sf::RectangleShape>(rectangle.boundingBox,rectangle.shape);
+            object<sf::RectangleShape> newObj = object<sf::RectangleShape>(rectangle.boundingBox, rectangle.shape);
             qt.insert(newObj);
         }
 
@@ -104,11 +105,11 @@ int main() {
             float newLength = box.getLength() + 50;
             float newHeigth = box.getHeight() + 50;
 
-            axisAlignedBoundingBox queryRegion = axisAlignedBoundingBox(newOriginX,newOriginY,newLength,newHeigth);
+            axisAlignedBoundingBox queryRegion = axisAlignedBoundingBox(newOriginX, newOriginY, newLength, newHeigth);
             auto otherRectangles = qt.query_region(queryRegion);
             for (auto &otherRect: otherRectangles) {
                 collisions++;
-                if (&rectangle.boundingBox != &otherRect.box && collides(rectangle.boundingBox, otherRect.box)) {
+                if (rectangle.boundingBox != otherRect.box && collides(rectangle.boundingBox, otherRect.box)) {
                     rectangle.shape.setFillColor(sf::Color::Red);
                     sf::RectangleShape rect = otherRect.value;
                     rect.setFillColor(sf::Color::Red);
@@ -132,9 +133,9 @@ int main() {
         window.display();
 
         frames += 1;
-        while (frames > maxFrames){
+        while (frames > maxFrames) {
             window.clear();
-            my_text.setPosition({(float) windowWidth/2-my_text.getGlobalBounds().width/2,(float) windowHeight/2 - my_text.getGlobalBounds().height/2});
+            my_text.setPosition({(float) windowWidth / 2 - my_text.getGlobalBounds().width / 2, (float) windowHeight / 2 - my_text.getGlobalBounds().height / 2});
             my_text.setCharacterSize(50);
             window.draw(my_text);
             window.display();
