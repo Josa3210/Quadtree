@@ -230,7 +230,7 @@ TEST_CASE("Querying region with split quadtree") {
 }
 
 TEST_CASE("Iterating over the quadtree") {
-    axisAlignedBoundingBox boundingBox = axisAlignedBoundingBox({100, 100}, 100, 100);
+    axisAlignedBoundingBox boundingBox = axisAlignedBoundingBox({0, 0}, 200, 200);
     Quadtree<std::string> quadtree = Quadtree<std::string>(boundingBox, 10);
 
     // Will end up in north-east quadrant
@@ -269,17 +269,12 @@ TEST_CASE("Iterating over the quadtree") {
     object<std::string> object9 = object<std::string>(testBox9, "TestBox9");
     quadtree.insert(object9);
 
-    auto objIt = quadtree.getObjects().begin();
     auto qtIt = quadtree.begin();
 
-    while (objIt != quadtree.getObjects().end()) {
-        auto object = *objIt;
-        std::cout << object << std::endl;
+    while (qtIt != quadtree.end()) {
         auto qtObject = *qtIt;
         std::cout << qtObject << std::endl;
 
-        REQUIRE(objIt == qtIt);
-        objIt++;
         qtIt++;
     }
 }

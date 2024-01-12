@@ -16,7 +16,7 @@ TEST_CASE("Merging"){
     set2.insert(4);
 
     std::unordered_set<int> set3;
-    set3 = merge(set1, set2);
+    set3 = unorderedSet::merge(set1, set2);
 
     REQUIRE(set3.count(1));
     REQUIRE(set3.count(2));

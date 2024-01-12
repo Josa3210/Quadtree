@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <ostream>
+#include <algorithm>
 #include <utility>
 #include <unordered_set>
 #include <list>
@@ -31,6 +32,7 @@ private:
 
     // A vector that stores the objects contained in the current Quadtree node
     std::vector<object<MetadataType>> objects = std::vector<object<MetadataType>>();
+    std::vector<object<MetadataType>> allObjects = std::vector<object<MetadataType>>();
 
     // variable that keeps track of whether the region has been divided into four sub-regions
     bool divided = false;
@@ -40,7 +42,6 @@ private:
     Quadtree<MetadataType> *southEast = nullptr;
     Quadtree<MetadataType> *southWest = nullptr;
     Quadtree<MetadataType> *northWest = nullptr;
-
 
     // Responsible for dividing the current region into four equal sub-regions.
     // It calculates the origin, length, and height of the new sub-regions based on the current region's bounding box.
@@ -222,19 +223,41 @@ public:
         if (!this->isDivided()) return items;
 
         // Recursively query each child section and merge their results into the set of collected objects
-        items = merge(items, this->getNorthEast()->query_region(aabb));
-        items = merge(items, this->getSouthEast()->query_region(aabb));
-        items = merge(items, this->getSouthWest()->query_region(aabb));
-        items = merge(items, this->getNorthWest()->query_region(aabb));
+        items = unorderedSet::merge(items, this->getNorthEast()->query_region(aabb));
+        items = unorderedSet::merge(items, this->getSouthEast()->query_region(aabb));
+        items = unorderedSet::merge(items, this->getSouthWest()->query_region(aabb));
+        items = unorderedSet::merge(items, this->getNorthWest()->query_region(aabb));
 
         return items; // Return the final set of collected objects
     }
 
+    typename std::vector<object<MetadataType>> getAllObjects() {
+        std::vector<object<MetadataType>> _allObjects;
+
+        std::move(this->objects.begin(),this->objects.end(),std::back_inserter(_allObjects));
+        if (isDivided()){
+            std::vector<object<MetadataType>> NEobjects = this->getNorthEast()->getObjects();
+            std::move(NEobjects.begin(),NEobjects.end(),std::back_inserter(_allObjects));
+
+            std::vector<object<MetadataType>> SWobjects = this->getNorthEast()->getObjects();
+            std::move(SWobjects.begin(),SWobjects.end(),std::back_inserter(_allObjects));
+
+            std::vector<object<MetadataType>> NWobjects = this->getNorthEast()->getObjects();
+            std::move(NWobjects.begin(),NWobjects.end(),std::back_inserter(_allObjects));
+
+            std::vector<object<MetadataType>> SEobjects = this->getNorthEast()->getObjects();
+            std::move(SEobjects.begin(),SEobjects.end(),std::back_inserter(_allObjects));
+        }
+        this->allObjects = _allObjects;
+        return _allObjects;
+    }
+
+
     // This function returns an iterator pointing to the beginning of the objects vector.
-    typename std::vector<object<MetadataType>>::iterator begin() { return objects.begin(); };
+    typename std::vector<object<MetadataType>>::iterator begin() {return this->getAllObjects().begin(); };
 
     // This function returns an iterator pointing to the end of the objects vector.
-    typename std::vector<object<MetadataType>>::iterator end() { return objects.end(); };
+    typename std::vector<object<MetadataType>>::iterator end() { return this->getAllObjects().end(); };
 
 };
 

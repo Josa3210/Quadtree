@@ -4,17 +4,20 @@
 #include <cmath>
 #include <ostream>
 #include "axisAlignedBoundingBox.h"
+#include "chrono"
 
 template<typename MetadataType>
 struct object {
     // Constructor for object struct
-    object(const axisAlignedBoundingBox &box, MetadataType value) : box(box), value(value) {};
+    object(const axisAlignedBoundingBox &box, MetadataType value) : box(box), value(value),id(std::chrono::milliseconds()) {};
 
     // Overloaded equality operator
     bool operator==(const object &rhs) const { return box == rhs.box; };
 
     // Overloaded inequality operator
     bool operator!=(const object &rhs) const { return rhs != *this; }
+
+    bool operator<(const object &rhs) const {return this->id < rhs.id; }
 
     // Overloaded stream insertion operator
     friend std::ostream &operator<<(std::ostream &os, const object<MetadataType> &object) {
@@ -27,6 +30,9 @@ struct object {
 
     // Metadata value
     MetadataType value;
+
+    // unique id
+    std::chrono::duration<int64_t, std::milli> id;
 };
 
 template<typename MetadataType>
