@@ -30,16 +30,16 @@ TEST_CASE("Test creation of QuadTree") {
 
 
 TEST_CASE("Insert objects in QuadTree") {
-    axisAlignedBoundingBox boxqt = axisAlignedBoundingBox({10, 10}, 10, 10);
+    axisAlignedBoundingBox boxqt = axisAlignedBoundingBox({0, 0}, 20, 20);
     Quadtree<std::string> quadtree = Quadtree<std::string>(boxqt, 2);
 
-    REQUIRE(quadtree.getObjects().empty());
+    REQUIRE(quadtree.isEmpty() == true);
 
-    axisAlignedBoundingBox testBox1 = axisAlignedBoundingBox({25, 25}, 2, 2);
+    axisAlignedBoundingBox testBox1 = axisAlignedBoundingBox({20, 15}, 2, 2);
     object<std::string> object1 = object<std::string>(testBox1, "TestBox1");
     quadtree.insert(object1);
 
-    REQUIRE(quadtree.getObjects().empty());
+    REQUIRE(quadtree.isEmpty() == true);
 
     axisAlignedBoundingBox testBox2 = axisAlignedBoundingBox({5, 5}, 2, 2);
     object<std::string> object2 = object<std::string>(testBox2, "TestBox2");
@@ -51,10 +51,10 @@ TEST_CASE("Insert objects in QuadTree") {
 
 
 TEST_CASE("Division of QuadTree when capacity is full") {
-    axisAlignedBoundingBox boxqt = axisAlignedBoundingBox({100, 100}, 100, 100);
+    axisAlignedBoundingBox boxqt = axisAlignedBoundingBox({0, 0}, 200, 200);
     Quadtree<std::string> quadtree = Quadtree<std::string>(boxqt, 2);
 
-    REQUIRE(quadtree.getObjects().empty());
+    REQUIRE(quadtree.isEmpty());
 
     // Will end up in north-west quadrant
     axisAlignedBoundingBox testBox1 = axisAlignedBoundingBox({55, 55}, 2, 2);
@@ -75,7 +75,7 @@ TEST_CASE("Division of QuadTree when capacity is full") {
     quadtree.insert(object3);
 
     REQUIRE(quadtree.isDivided());
-    REQUIRE(quadtree.getObjects().empty());
+    REQUIRE(quadtree.isEmpty());
 
     REQUIRE(quadtree.getNorthEast()->isDivided() == false);
     REQUIRE(quadtree.getSouthEast()->isDivided() == false);
@@ -87,7 +87,7 @@ TEST_CASE("Division of QuadTree when capacity is full") {
     REQUIRE(quadtree.getNorthEast()->getObjects().at(0).box == testBox3);
 
     // Will collide with multiple quadtrees, so will end up in parent
-    axisAlignedBoundingBox testBox4 = axisAlignedBoundingBox({101, 101}, 5, 5);
+    axisAlignedBoundingBox testBox4 = axisAlignedBoundingBox({97, 50}, 5, 5);
     object<std::string> object4 = object<std::string>(testBox4, "TestBox4");
     quadtree.insert(object4);
 
@@ -98,7 +98,7 @@ TEST_CASE("Division of QuadTree when capacity is full") {
 
 
 TEST_CASE("Querying region in Quadtree without division") {
-    axisAlignedBoundingBox boxqt = axisAlignedBoundingBox({100, 100}, 100, 100);
+    axisAlignedBoundingBox boxqt = axisAlignedBoundingBox({0, 0}, 200, 200);
     Quadtree<std::string> quadtree = Quadtree<std::string>(boxqt, 10);
 
 
@@ -124,51 +124,52 @@ TEST_CASE("Querying region in Quadtree without division") {
 
     REQUIRE_FALSE(quadtree.isDivided());
 
-    axisAlignedBoundingBox toQueryRegion = axisAlignedBoundingBox({150, 50}, 50, 50);
+    // Query the NE area
+    axisAlignedBoundingBox toQueryRegion = axisAlignedBoundingBox({100, 0}, 100, 100);
     objectSet<std::string> items = quadtree.query_region(toQueryRegion);
 
     REQUIRE(items.size() == 1);
     REQUIRE(items.count(object1) == 1);
 
-    toQueryRegion.setOrigin({150, 150});
+    toQueryRegion.setOrigin({100, 100});
     items = quadtree.query_region(toQueryRegion);
 
     REQUIRE(items.size() == 1);
     REQUIRE(items.count(object2) == 1);
 
-    toQueryRegion.setOrigin({50, 150});
+    toQueryRegion.setOrigin({0, 100});
     items = quadtree.query_region(toQueryRegion);
 
     REQUIRE(items.size() == 1);
     REQUIRE(items.count(object3) == 1);
 
-    toQueryRegion.setOrigin({50, 50});
+    toQueryRegion.setOrigin({0, 0});
     items = quadtree.query_region(toQueryRegion);
 
     REQUIRE(items.size() == 1);
     REQUIRE(items.count(object4) == 1);
 
-    // Add another aabb in the northeast quadrant that does not touch TestBox1
+    // Add another aabb in the NE quadrant that does not touch TestBox1
     axisAlignedBoundingBox testBox5 = axisAlignedBoundingBox({130, 30}, 5, 5);
     object<std::string> object5 = object<std::string>(testBox5, "TestBox5");
     quadtree.insert(object5);
 
-    toQueryRegion.setOrigin({150, 50});
+    toQueryRegion.setOrigin({100, 0});
     items = quadtree.query_region(toQueryRegion);
 
     REQUIRE(items.size() == 2);
     REQUIRE(items.count(object1) == 1);
     REQUIRE(items.count(object5) == 1);
 
-    // Add another aabb overlapping between south-east and south-west
-    axisAlignedBoundingBox testBox6 = axisAlignedBoundingBox({100, 130}, 5, 5);
+    // Add another aabb overlapping between SE and SW
+    axisAlignedBoundingBox testBox6 = axisAlignedBoundingBox({98, 130}, 5, 5);
     object<std::string> object6 = object<std::string>(testBox6, "TestBox6");
     quadtree.insert(object6);
 
     // If everything is right, both sets must contain TestBox 6
-    toQueryRegion.setOrigin({150, 150});
+    toQueryRegion.setOrigin({100, 100});
     auto items1 = quadtree.query_region(toQueryRegion);
-    toQueryRegion.setOrigin({50, 150});
+    toQueryRegion.setOrigin({0, 100});
     auto items2 = quadtree.query_region(toQueryRegion);
 
     REQUIRE(items1.size() == 2);
@@ -182,17 +183,17 @@ TEST_CASE("Querying region in Quadtree without division") {
 
 
 TEST_CASE("Querying region with split quadtree") {
-    axisAlignedBoundingBox boxqt = axisAlignedBoundingBox({100, 100}, 100, 100);
+    axisAlignedBoundingBox boxqt = axisAlignedBoundingBox({0, 0}, 200, 200);
     Quadtree<std::string> quadtree = Quadtree<std::string>(boxqt, 1);
 
     // Will end up in north-east quadrant
-    axisAlignedBoundingBox testBox1 = axisAlignedBoundingBox({150, 50}, 10, 10);
+    axisAlignedBoundingBox testBox1 = axisAlignedBoundingBox({100, 0}, 10, 10);
     object<std::string> object1 = object<std::string>(testBox1, "TestBox1");
     quadtree.insert(object1);
 
     REQUIRE_FALSE(quadtree.isDivided());
 
-    axisAlignedBoundingBox toQueryRegion = axisAlignedBoundingBox({100, 100}, 100, 100);
+    axisAlignedBoundingBox toQueryRegion = quadtree.getBounds();
     auto items = quadtree.query_region(toQueryRegion);
 
     REQUIRE(items.size() == 1);
@@ -212,7 +213,7 @@ TEST_CASE("Querying region with split quadtree") {
     REQUIRE(items.count(object2));
 
     // Will end up in the object list of the parent
-    axisAlignedBoundingBox testBox3 = axisAlignedBoundingBox({100, 150}, 10, 10);
+    axisAlignedBoundingBox testBox3 = axisAlignedBoundingBox({95, 150}, 10, 10);
     object<std::string> object3 = object<std::string>(testBox3, "TestBox3");
     quadtree.insert(object3);
 
@@ -228,9 +229,9 @@ TEST_CASE("Querying region with split quadtree") {
     REQUIRE(items.count(object3));
 }
 
-TEST_CASE("Iterating over the quadtree"){
-    axisAlignedBoundingBox boundingBox = axisAlignedBoundingBox({100,100},100,100);
-    Quadtree<std::string> quadtree = Quadtree<std::string>(boundingBox,10);
+TEST_CASE("Iterating over the quadtree") {
+    axisAlignedBoundingBox boundingBox = axisAlignedBoundingBox({100, 100}, 100, 100);
+    Quadtree<std::string> quadtree = Quadtree<std::string>(boundingBox, 10);
 
     // Will end up in north-east quadrant
     axisAlignedBoundingBox testBox1 = axisAlignedBoundingBox({150, 50}, 10, 10);
@@ -270,16 +271,15 @@ TEST_CASE("Iterating over the quadtree"){
 
     auto objIt = quadtree.getObjects().begin();
     auto qtIt = quadtree.begin();
-    while (objIt != quadtree.getObjects().end()){
+
+    while (objIt != quadtree.getObjects().end()) {
         auto object = *objIt;
-        std::cout<<object<<std::endl;
+        std::cout << object << std::endl;
         auto qtObject = *qtIt;
-        std::cout<<qtObject<<std::endl;
+        std::cout << qtObject << std::endl;
 
         REQUIRE(objIt == qtIt);
         objIt++;
         qtIt++;
     }
-
-
 }
