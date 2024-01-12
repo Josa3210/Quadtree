@@ -14906,7 +14906,7 @@ namespace Catch {
         auto token = preprocessPattern();
 
         if (!token.empty()) {
-            // If the tag pattern is the "hide and tag" shorthand (e.g. [.foo])
+            // If the tag pattern is the "hide and tag" shorthand (e.g. [.randPoint])
             // we have to create a separate hide tag and shorten the real one
             if (token.size() > 1 && token[0] == '.') {
                 token.erase(token.begin());
